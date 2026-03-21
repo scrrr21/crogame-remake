@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
+from aiogram.client.default import DefaultBotProperties
 
 from config import BOT_TOKEN
 from services.game_manager import game_manager
@@ -12,19 +13,17 @@ from utils.user import user_link
 
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
+bot = Bot(
+    token=BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode="HTML")
+)
+
 dp = Dispatcher()
 
 
 # ✅ Проверка на группу
 def is_group(message: Message):
     return message.chat.type in ["group", "supergroup"]
-
-
-# 🧪 ТЕСТ (чтобы понять, жив ли бот)
-@dp.message()
-async def test(message: Message):
-    await message.answer("Я жив!")
 
 
 # 🎮 СТАРТ ИГРЫ
@@ -85,6 +84,12 @@ async def new_word(callback: CallbackQuery):
         f"🗞Обновленное слово:\n<b>{word}</b>",
         show_alert=True
     )
+
+
+# 🧪 ТЕСТ (ВСЕГДА ВНИЗУ!)
+@dp.message()
+async def test(message: Message):
+    await message.answer("Я жив!")
 
 
 async def main():
