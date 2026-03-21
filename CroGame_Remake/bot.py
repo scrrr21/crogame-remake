@@ -73,7 +73,7 @@ async def show_word(callback: CallbackQuery):
     word = game_manager.get_word(callback.message.chat.id)
 
     await callback.answer(
-        f"📝Загаданное слово:\n<b>{word}</b>",
+        f"📝Загаданное слово:\n{word}",
         show_alert=True
     )
 
@@ -89,18 +89,12 @@ async def new_word(callback: CallbackQuery):
     if callback.from_user.id != game.leader_id:
         return await callback.answer("Это слово предназначено не для тебя!", show_alert=True)
 
-    word = game_manager.get_word(callback.message.chat.id)
+    word = game_manager.get_word(callback.message.chat.id, new=True)
 
     await callback.answer(
-        f"🗞Обновленное слово:\n<b>{word}</b>",
+        f"🗞Обновленное слово:\n{word}",
         show_alert=True
     )
-
-
-# 🧪 ТЕСТ (ВСЕГДА ВНИЗУ!)
-@dp.message()
-async def test(message: Message):
-    await message.answer("Я жив!")
 
 
 async def main():
