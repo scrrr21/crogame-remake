@@ -21,19 +21,17 @@ bot = Bot(
 dp = Dispatcher()
 
 
-# ✅ Проверка на группу
 def is_group(message: Message):
     return message.chat.type in ["group", "supergroup"]
 
 
-# ⏱ формат времени
 def format_time(seconds: int):
     minutes = seconds // 60
     sec = seconds % 60
     return f"{minutes}:{sec:02d}"
 
 
-# 🎮 СТАРТ ИГРЫ
+# 🎮 СТАРТ
 @dp.message(Command("game"))
 async def cmd_game(message: Message):
     if not is_group(message):
@@ -59,7 +57,7 @@ async def cmd_game(message: Message):
     )
 
 
-# 🔎 ПОКАЗАТЬ СЛОВО
+# 🔎 ПОСМОТРЕТЬ СЛОВО
 @dp.callback_query(lambda c: c.data == "show_word")
 async def show_word(callback: CallbackQuery):
     game = game_manager.get_game(callback.message.chat.id)
@@ -70,7 +68,8 @@ async def show_word(callback: CallbackQuery):
     if callback.from_user.id != game.leader_id:
         return await callback.answer("Это слово предназначено не для тебя!", show_alert=True)
 
-    word = game_manager.get_word(callback.message.chat.id)
+    # 👉 если слова ещё нет — создаём
+    word = game_manager.generate_word(callback.message.chat.id)
 
     await callback.answer(
         f"📝Загаданное слово:\n{word}",
@@ -89,7 +88,7 @@ async def new_word(callback: CallbackQuery):
     if callback.from_user.id != game.leader_id:
         return await callback.answer("Это слово предназначено не для тебя!", show_alert=True)
 
-    word = game_manager.get_word(callback.message.chat.id, new=True)
+    word = game_manager.new_word(callback.message.chat.id)
 
     await callback.answer(
         f"🗞Обновленное слово:\n{word}",
