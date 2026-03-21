@@ -26,6 +26,13 @@ def is_group(message: Message):
     return message.chat.type in ["group", "supergroup"]
 
 
+# ⏱ формат времени
+def format_time(seconds: int):
+    minutes = seconds // 60
+    sec = seconds % 60
+    return f"{minutes}:{sec:02d}"
+
+
 # 🎮 СТАРТ ИГРЫ
 @dp.message(Command("game"))
 async def cmd_game(message: Message):
@@ -35,8 +42,12 @@ async def cmd_game(message: Message):
     game = game_manager.start_game(message.chat.id, message.from_user.id)
 
     if not game:
+        time_left = game_manager.time_left(message.chat.id)
+
         return await message.answer(
-            "❌Текущий раунд ещё не закончился!\nПодождите 5 минут."
+            f"❌Текущий раунд ещё не закончился!\n"
+            f"Подождите {format_time(time_left)}.",
+            disable_web_page_preview=True
         )
 
     user = user_link(message.from_user)
