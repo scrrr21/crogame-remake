@@ -1,21 +1,30 @@
+import asyncio
+import logging
+
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
-import logging
 
-logging.basicConfig(level=logging.INFO)
 from config import BOT_TOKEN
-from db import connect, create_tables
 from services.game_manager import game_manager
 from keyboards.inline import game_keyboard
 from utils.user import user_link
+
+logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
 dp = Dispatcher()
 
 
+# ✅ Проверка на группу
 def is_group(message: Message):
     return message.chat.type in ["group", "supergroup"]
+
+
+# 🧪 ТЕСТ (чтобы понять, жив ли бот)
+@dp.message()
+async def test(message: Message):
+    await message.answer("Я жив!")
 
 
 # 🎮 СТАРТ ИГРЫ
@@ -76,3 +85,11 @@ async def new_word(callback: CallbackQuery):
         f"🗞Обновленное слово:\n<b>{word}</b>",
         show_alert=True
     )
+
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
