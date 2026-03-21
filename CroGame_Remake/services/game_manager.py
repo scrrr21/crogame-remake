@@ -1,6 +1,10 @@
 import random
 import time
 
+
+ROUND_TIME = 300  # 5 минут
+
+
 class GameState:
     def __init__(self, chat_id, leader_id):
         self.chat_id = chat_id
@@ -23,10 +27,16 @@ class GameManager:
             return ["Тест", "Влаг", "Умпалумпа", "Тиффани", "Ульяга"]
 
     def start_game(self, chat_id, user_id):
-        if chat_id in self.games:
-            game = self.games[chat_id]
-            if not game.finished and time.time() - game.start_time < 300:
-                return None  # нельзя начать
+        game = self.games.get(chat_id)
+
+        # если есть активная игра
+        if game and not game.finished:
+            # если не прошло 5 минут — запрещаем
+            if time.time() - game.start_time < ROUND_TIME:
+                return None
+            else:
+                # анти-АФК: сбрасываем игру
+                self.games.pop(chat_id)
 
         game = GameState(chat_id, user_id)
         self.games[chat_id] = game
@@ -42,6 +52,15 @@ class GameManager:
 
         game.word = random.choice(self.words)
         return game.word
+
+    def time_left(self, chat_id):
+        game = self.games.get(chat_id)
+        if not game:
+            return 0
+
+        elapsed = time.time() - game.start_time
+        left = ROUND_TIME - elapsed
+        return max(0, int(left))
 
 
 game_manager = GameManager()
