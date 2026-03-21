@@ -42,13 +42,31 @@ class GameManager:
     def get_game(self, chat_id):
         return self.games.get(chat_id)
 
-    def get_word(self, chat_id, new=False):
+    # 👉 просто получить текущее слово
+    def current_word(self, chat_id):
+        game = self.games.get(chat_id)
+        if not game:
+            return None
+        return game.word
+
+    # 👉 сгенерировать первое слово (если его нет)
+    def generate_word(self, chat_id):
         game = self.games.get(chat_id)
         if not game:
             return None
 
-        # если новое слово — избегаем повторения
-        if new and game.word:
+        if not game.word:
+            game.word = random.choice(self.words)
+
+        return game.word
+
+    # 👉 обновить слово
+    def new_word(self, chat_id):
+        game = self.games.get(chat_id)
+        if not game:
+            return None
+
+        if game.word:
             words = [w for w in self.words if w != game.word]
             if words:
                 game.word = random.choice(words)
