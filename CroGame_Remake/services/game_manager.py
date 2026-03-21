@@ -29,13 +29,10 @@ class GameManager:
     def start_game(self, chat_id, user_id):
         game = self.games.get(chat_id)
 
-        # если есть активная игра
         if game and not game.finished:
-            # если не прошло 5 минут — запрещаем
             if time.time() - game.start_time < ROUND_TIME:
                 return None
             else:
-                # анти-АФК: сбрасываем игру
                 self.games.pop(chat_id)
 
         game = GameState(chat_id, user_id)
@@ -45,12 +42,21 @@ class GameManager:
     def get_game(self, chat_id):
         return self.games.get(chat_id)
 
-    def get_word(self, chat_id):
+    def get_word(self, chat_id, new=False):
         game = self.games.get(chat_id)
         if not game:
             return None
 
-        game.word = random.choice(self.words)
+        # если новое слово — избегаем повторения
+        if new and game.word:
+            words = [w for w in self.words if w != game.word]
+            if words:
+                game.word = random.choice(words)
+            else:
+                game.word = random.choice(self.words)
+        else:
+            game.word = random.choice(self.words)
+
         return game.word
 
     def time_left(self, chat_id):
